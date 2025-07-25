@@ -1,4 +1,4 @@
-event_file = "./eve.json"
+event_file = "/etc/eve.json"
 
 template = """
 === Suricata Alert ===
@@ -54,5 +54,5 @@ settings.enabled = true
 
 [backends.http]
 settings.enabled = true
-settings.endpoint = "https://ntfy.sh/test"
+settings.endpoint = "https://ntfy.sh/test99191"
 settings.method = "POST"

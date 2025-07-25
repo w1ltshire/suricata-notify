@@ -1,0 +1,8 @@
+services:
+  suricata-notify:
+    image: w1ltshire/suricata-notify:latest
+    container_name: suricata-notify
+    restart: always
+    volumes:
+      - path to eve.json:/etc/eve.json
+      - ./config.toml:/etc/suricata-notify.toml

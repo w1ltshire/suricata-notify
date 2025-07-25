@@ -15,7 +15,22 @@
 - Send alerts to HTTP endpoints (basic functionality)
 
 ## Installation
+Clone the repository:
+```bash
+git clone https://github.com/w1ltshire/suricata-notify.git
+```
 
+Copy the `config.example.toml` to `config.toml` and edit it to your needs. Template section should be self-explanatory.
+
+```bash
+cp config.example.toml config.toml
+```
+
+Edit `docker-compose.yml` and set the path to your `eve.json` file and then run the container:
+```bash
+docker compose up -d
+```
+Everything should be up and running now.
 
 ## Roadmap
 - [ ] Add support for multiple backends of the same type
