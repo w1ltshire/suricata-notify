@@ -54,5 +54,5 @@ settings.enabled = true
 
 [backends.http]
 settings.enabled = true
-settings.endpoint = "https://ntfy.sh/test99191"
+settings.endpoint = "https://ntfy.sh/test"
 settings.method = "POST"
