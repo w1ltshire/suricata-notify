@@ -12,6 +12,7 @@ async-trait = "0.1.88"
 clap = { version = "4.5.41", features = ["derive"] }
 config = { version = "0.15.13", features = ["json"] }
 env_logger = "0.11.8"
+escape_string = "0.1.2"
 futures = "0.3.31"
 handlebars = "6.3.2"
 lazy_static = "1.5.0"

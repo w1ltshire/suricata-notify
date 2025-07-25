@@ -15,26 +15,33 @@ fn get_reader_from_position<P: AsRef<Path>>(path: P, pos: u64) -> std::io::Resul
 }
 
 fn parse_and_filter_alerts<R: BufRead>(reader: R, tx: Sender<EveEvent>, max_severity: u8) {
-    for line in reader.lines().map_while(Result::ok) {
-        if line.trim().is_empty() {
-            continue;
-        }
+    let mut buffer = String::new();
 
-        match serde_json::from_str::<EveEvent>(&line) {
-            Ok(event) if event.event_type.as_deref() == Some("alert") => {
-                if event.alert.clone().unwrap().severity.unwrap_or(3) <= max_severity {
-                    log::debug!("alert severity is less than or equal than max_severity, sending");
-                    // Unwrap is safe here because we know the alert is Some(Alert)
-                    if let Err(e) = tx.send(event) {
-                        log::warn!("failed to send alert, is anyone listening?: {:?}", e);
+    for line in reader.lines().map_while(Result::ok) {
+        buffer.push_str(&line);
+
+        match serde_json::from_str::<EveEvent>(&buffer) {
+            Ok(event) => {
+                buffer.clear(); // reset for next event
+                if event.event_type.as_deref() == Some("alert") {
+                    if event.alert.clone().unwrap().severity.unwrap_or(3) <= max_severity {
+                        if let Err(e) = tx.send(event) {
+                            log::warn!("failed to send alert, is anyone listening?: {:?}", e);
+                        }
                     }
                 }
             }
-            Ok(_) => {
-                log::debug!("not an alert, ignoring");
-            }
             Err(e) => {
-                eprintln!("Failed to deserialize event: {}", e);
+                // If error is EOF or incomplete JSON, continue reading lines
+                // Otherwise print error and reset buffer to avoid infinite loop
+
+                if e.is_eof() {
+                    // keep reading more lines until JSON completes
+                    continue;
+                } else {
+                    eprintln!("Failed to deserialize event: {}", e);
+                    buffer.clear(); // discard bad data
+                }
             }
         }
     }
