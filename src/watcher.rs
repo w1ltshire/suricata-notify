@@ -31,7 +31,11 @@ fn async_watcher() -> notify::Result<(RecommendedWatcher, Receiver<notify::Resul
     Ok((watcher, rx))
 }
 
-pub async fn async_watch<P: AsRef<Path>>(path: P, tx: Sender<EveEvent>) -> notify::Result<()> {
+pub async fn async_watch<P: AsRef<Path>>(
+    path: P,
+    tx: Sender<EveEvent>,
+    max_severity: u8,
+) -> notify::Result<()> {
     let (mut watcher, mut rx) = async_watcher()?;
 
     // Add a path to be watched. All files and directories at that path and
@@ -48,7 +52,12 @@ pub async fn async_watch<P: AsRef<Path>>(path: P, tx: Sender<EveEvent>) -> notif
                         "received a file change event: {:?}, sending to parser",
                         event
                     );
-                    parse_json(event.paths.first().unwrap().to_str().unwrap(), tx.clone()).await; // `first().unwrap()` should be safe because we know there is at least one path
+                    parse_json(
+                        event.paths.first().unwrap().to_str().unwrap(),
+                        tx.clone(),
+                        max_severity,
+                    )
+                    .await; // `first().unwrap()` should be safe because we know there is at least one path
                 }
             }
             Err(e) => log::error!("watch error: {:?}", e),

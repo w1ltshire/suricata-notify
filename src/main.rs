@@ -91,7 +91,7 @@ async fn main() {
     log::debug!("closed file");
 
     log::debug!("starting async watcher");
-    if let Err(e) = async_watch(event_file, tx).await {
+    if let Err(e) = async_watch(event_file, tx, config.max_severity).await {
         log::error!("{:?}", e)
     }
 }

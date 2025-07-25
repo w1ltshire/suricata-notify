@@ -1,4 +1,5 @@
 event_file = "/etc/eve.json"
+max_severity = 2
 
 template = """
 === Suricata Alert ===

@@ -1,6 +1,6 @@
 [package]
 name = "suricata-notify"
-version = "0.4.0"
+version = "0.5.0"
 description = "✨ A tool to send notifications from Suricata to anywhere "
 license = "MIT"
 repository = "https://github.com/w1ltshire/suricata-notify/"

@@ -8,6 +8,7 @@ pub mod reader;
 #[derive(Debug, Deserialize)]
 pub struct AppConfig {
     pub event_file: String,
+    pub max_severity: u8,
     pub backends: HashMap<String, AlertBackendConfig>,
     pub template: String,
 }
