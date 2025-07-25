@@ -35,12 +35,4 @@ impl AlertBackend for DummyBackend {
             }
         }
     }
-
-    async fn send_alert(
-        &self,
-        alert: EveEvent,
-    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        println!("Logging alert: {:?}", alert);
-        Ok(())
-    }
 }

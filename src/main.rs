@@ -1,6 +1,4 @@
-use backends::AlertBackend;
-use backends::dummy::DummyBackend;
-
+use backends::factory::get_backend_registry;
 use clap::Parser;
 use std::fs::File;
 use tokio::sync::broadcast;
@@ -26,17 +24,44 @@ struct Args {
     event_file: Option<String>,
 
     /// Config file to use
-    #[arg(short, long, default_value = "/etc/suricata-notify.toml")]
-    config: String,
+    #[arg(short, long)]
+    config: Option<String>,
 }
 
 #[tokio::main]
 async fn main() {
     env_logger::init();
     let args = Args::parse();
-    let config = config::init(&args.config).await.unwrap();
+    let config = config::init(
+        &args
+            .config
+            .unwrap_or("/etc/suricata-notify.toml".to_string()),
+    )
+    .await
+    .unwrap();
+
+    log::debug!("config: {:?}", config);
 
     let event_file = args.event_file.unwrap_or(config.event_file);
+
+    let (tx, _) = broadcast::channel::<EveEvent>(100);
+
+    config.backends.iter().for_each(|backend| {
+        let registry = get_backend_registry();
+
+        if let Some(factory) = registry.get(backend.0.as_str()) {
+            log::debug!("registering backend {}", backend.0);
+
+            let mut backend = factory(tx.clone());
+
+            // You can now store `backend` in a vector or spawn its run
+            tokio::spawn(async move {
+                backend.run().await;
+            });
+        } else {
+            log::warn!("Unknown backend: {}", backend.0);
+        }
+    });
 
     log::info!("watching {}", event_file);
 
@@ -50,12 +75,10 @@ async fn main() {
     log::debug!("closed file");
 
     log::debug!("creating broadcast channel");
-    let (tx, _) = broadcast::channel::<EveEvent>(100); // buffer size 100
+    //    let (tx, _) = broadcast::channel::<EveEvent>(100); // buffer size 100
 
     log::debug!("starting async watcher");
-    futures::executor::block_on(async {
-        if let Err(e) = async_watch(event_file, tx).await {
-            log::error!("{:?}", e)
-        }
-    });
+    if let Err(e) = async_watch(event_file, tx).await {
+        log::error!("{:?}", e)
+    }
 }

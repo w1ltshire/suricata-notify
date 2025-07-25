@@ -12,7 +12,7 @@
 
 ## Roadmap
 - [ ] Add support for multiple backends
-- [ ] Add configuration system
+- [x] Add configuration system
 - [ ] Tide up the code
 
 ## License
