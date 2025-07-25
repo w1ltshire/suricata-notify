@@ -36,5 +36,3 @@ jobs:
           context: .
           push: true
           tags: w1ltshire/suricata-notify:latest
-          cache-from: type=registry,ref=w1ltshire/suricata-notify:latest
-          cache-to: type=registry,ref=w1ltshire/suricata-notify:latest,mode=max

@@ -4,5 +4,5 @@ services:
     container_name: suricata-notify
     restart: always
     volumes:
-      - path to eve.json:/etc/eve.json
+      - /home/corruptmemory/misc/temp/eve.json:/etc/eve.json
       - ./config.toml:/etc/suricata-notify.toml
