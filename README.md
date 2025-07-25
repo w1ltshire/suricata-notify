@@ -8,7 +8,7 @@
 <h4 align="center">✨ A tool to send notifications from Suricata to anywhere </h4>
 
 > [!WARNING]
-> This software is still in development and probably is not ready for production use & may contain bugs. I built it for my own use and decided to share it with the world.
+> This software is still in development and probably is not ready for production use & may contain bugs. It may be not working at the moment. I built it for my own use and decided to share it with the world.
 
 ## Roadmap
 - [ ] Add support for multiple backends
