@@ -1,5 +1,6 @@
 use backends::factory::get_backend_registry;
 use clap::Parser;
+use once_cell::sync::OnceCell;
 use std::fs::File;
 use tokio::sync::broadcast;
 use types::EveEvent;
@@ -8,12 +9,14 @@ use watcher::async_watch;
 mod backends;
 mod config;
 mod parser;
+mod templates;
 mod types;
 mod watcher;
 
 use std::sync::atomic::{AtomicU64, Ordering};
 
 static FILE_SIZE: AtomicU64 = AtomicU64::new(0);
+static TEMPLATE: OnceCell<String> = OnceCell::new();
 
 /// A tool to send notifications from Suricata to anywhere
 #[derive(Parser, Debug)]
@@ -42,24 +45,37 @@ async fn main() {
 
     log::debug!("config: {:?}", config);
 
+    TEMPLATE.set(config.template).unwrap();
+
     let event_file = args.event_file.unwrap_or(config.event_file);
 
+    log::debug!("creating broadcast channel");
     let (tx, _) = broadcast::channel::<EveEvent>(100);
 
+    log::debug!("registering backends");
     config.backends.iter().for_each(|backend| {
         let registry = get_backend_registry();
 
         if let Some(factory) = registry.get(backend.0.as_str()) {
-            log::debug!("registering backend {}", backend.0);
+            if backend
+                .1
+                .settings
+                .get("enabled")
+                .unwrap_or(&"false".to_string())
+                == "true"
+            {
+                log::debug!("registering backend {}", backend.0);
 
-            let mut backend = factory(tx.clone());
+                let mut backend = factory(tx.clone(), backend.1.settings.clone());
 
-            // You can now store `backend` in a vector or spawn its run
-            tokio::spawn(async move {
-                backend.run().await;
-            });
+                tokio::spawn(async move {
+                    backend.run().await;
+                });
+            } else {
+                log::info!("{} is disabled", backend.0);
+            }
         } else {
-            log::warn!("Unknown backend: {}", backend.0);
+            log::warn!("unknown backend: {}", backend.0);
         }
     });
 
@@ -73,9 +89,6 @@ async fn main() {
 
     std::mem::drop(file);
     log::debug!("closed file");
-
-    log::debug!("creating broadcast channel");
-    //    let (tx, _) = broadcast::channel::<EveEvent>(100); // buffer size 100
 
     log::debug!("starting async watcher");
     if let Err(e) = async_watch(event_file, tx).await {

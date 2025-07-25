@@ -3,14 +3,19 @@ use std::collections::HashMap;
 use config::Config;
 use serde::Deserialize;
 
+pub mod reader;
+
 #[derive(Debug, Deserialize)]
 pub struct AppConfig {
     pub event_file: String,
     pub backends: HashMap<String, AlertBackendConfig>,
+    pub template: String,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct AlertBackendConfig {}
+pub struct AlertBackendConfig {
+    pub settings: HashMap<String, String>,
+}
 
 pub async fn init(path: &str) -> anyhow::Result<AppConfig> {
     let settings = Config::builder()

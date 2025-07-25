@@ -1,3 +1,58 @@
 event_file = "./eve.json"
 
+template = """
+=== Suricata Alert ===
+Timestamp: {{timestamp}}
+Event Type: {{event_type}}
+Interface: {{in_iface}}
+
+-- Source --
+IP: {{src_ip}}:{{src_port}}
+Protocol: {{proto}}
+
+-- Destination --
+IP: {{dest_ip}}:{{dest_port}}
+
+-- Flow Info --
+Flow ID: {{flow_id}}
+Direction: {{direction}}
+App Proto: {{app_proto}}
+Community ID: {{community_id}}
+Packets to Server: {{flow_pkts_toserver}}
+Packets to Client: {{flow_pkts_toclient}}
+Bytes to Server: {{flow_bytes_toserver}}
+Bytes to Client: {{flow_bytes_toclient}}
+Flow Start: {{flow_start}}
+
+-- Alert Info --
+Action: {{alert_action}}
+Signature: {{alert_signature}}
+Signature ID: {{alert_signature_id}}
+Category: {{alert_category}}
+Severity: {{alert_severity}}
+GID: {{alert_gid}}
+Rev: {{alert_rev}}
+
+-- Payload Info --
+Payload (Base64): {{payload}}
+Printable Payload: {{payload_printable}}
+Stream Index: {{stream}}
+Packet (Base64): {{packet}}
+
+-- Packet Info --
+Linktype: {{packet_linktype}}
+
+-- Other Info --
+Capture File: {{capture_file}}
+Host: {{host}}
+
+=======================
+"""
+
 [backends.dummy]
+settings.enabled = true
+
+[backends.http]
+settings.enabled = true
+settings.endpoint = "https://ntfy.sh/test"
+settings.method = "POST"

@@ -1,5 +1,6 @@
 pub mod dummy;
 pub mod factory;
+pub mod http;
 
 pub use dummy::DummyBackend;
 
